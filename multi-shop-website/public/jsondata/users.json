@@ -1,0 +1,72 @@
+[
+  {
+    "id": 1,
+    "name": "John Doe",
+    "email": "john.doe@example.com",
+    "role": "Admin",
+    "status": "Active"
+  },
+  {
+    "id": 2,
+    "name": "Jane Smith",
+    "email": "jane.smith@example.com",
+    "role": "Editor",
+    "status": "Inactive"
+  },
+  {
+    "id": 3,
+    "name": "Michael Johnson",
+    "email": "michael.johnson@example.com",
+    "role": "User",
+    "status": "Active"
+  },
+  {
+    "id": 4,
+    "name": "Emily Davis",
+    "email": "emily.davis@example.com",
+    "role": "User",
+    "status": "Banned"
+  },
+  {
+    "id": 5,
+    "name": "David Wilson",
+    "email": "david.wilson@example.com",
+    "role": "Editor",
+    "status": "Active"
+  },
+  {
+    "id": 6,
+    "name": "Sophia Brown",
+    "email": "sophia.brown@example.com",
+    "role": "User",
+    "status": "Inactive"
+  },
+  {
+    "id": 7,
+    "name": "Daniel Miller",
+    "email": "daniel.miller@example.com",
+    "role": "Admin",
+    "status": "Active"
+  },
+  {
+    "id": 8,
+    "name": "Olivia Garcia",
+    "email": "olivia.garcia@example.com",
+    "role": "User",
+    "status": "Active"
+  },
+  {
+    "id": 9,
+    "name": "James Martinez",
+    "email": "james.martinez@example.com",
+    "role": "Editor",
+    "status": "Banned"
+  },
+  {
+    "id": 10,
+    "name": "Isabella Rodriguez",
+    "email": "isabella.rodriguez@example.com",
+    "role": "User",
+    "status": "Active"
+  }
+]

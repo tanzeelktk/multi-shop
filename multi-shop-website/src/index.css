@@ -1,0 +1,32 @@
+@import "tailwindcss";
+@import "flowbite-react/plugin/tailwindcss";
+@source "../.flowbite-react/class-list.json";
+
+body{
+    color: #3d464d;
+}
+
+/*Footer*/
+.social-icon {
+    @apply p-3 bg-[#ffd333] hover:bg-[#ffc800] hover:cursor-pointer text-[#3d464d]
+}
+
+
+
+/*Admin Panel*/
+.trash-icon{
+    @apply text-red-500 hover:text-red-600 hover:cursor-pointer
+}
+
+.edit-icon{
+    @apply text-blue-500 hover:text-blue-600 hover:cursor-pointer
+}
+
+.eye-icon{
+    @apply text-pink-500 hover:text-pink-600 hover:cursor-pointer
+}
+
+.btn-add{
+    @apply py-2 px-4 bg-blue-600 hover:bg-blue-700 hover:cursor-pointer text-white font-semibold flex gap-1 items-center transition-colors duration-300
+}
+

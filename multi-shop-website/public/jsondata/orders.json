@@ -1,0 +1,145 @@
+[
+  {
+    "orderId": "ORD-1001",
+    "customer": {
+      "name": "Ali Khan",
+      "email": "ali@gmail.com",
+      "phone": "0301-1234567",
+      "address": "Lahore, Pakistan"
+    },
+    "items": [
+      {
+        "productId": 1,
+        "title": "Smart LED TV 42 Inch",
+        "price": 85000,
+        "quantity": 1
+      },
+      {
+        "productId": 11,
+        "title": "Smartphone X1",
+        "price": 65000,
+        "quantity": 1
+      }
+    ],
+    "subtotal": 150000,
+    "discount": 0,
+    "total": 150000,
+    "paymentMethod": "Cash on Delivery",
+    "status": "Pending",
+    "orderDate": "2026-01-18"
+  },
+
+  {
+    "orderId": "ORD-1002",
+    "customer": {
+      "name": "Sara Ahmed",
+      "email": "sara@gmail.com",
+      "phone": "0322-9876543",
+      "address": "Karachi, Pakistan"
+    },
+    "items": [
+      {
+        "productId": 28,
+        "title": "Running Shoes",
+        "price": 9000,
+        "quantity": 2
+      },
+      {
+        "productId": 20,
+        "title": "Casual Shirt",
+        "price": 2500,
+        "quantity": 1
+      }
+    ],
+    "subtotal": 20500,
+    "discount": 1000,
+    "total": 19500,
+    "paymentMethod": "Online Payment",
+    "status": "Completed",
+    "orderDate": "2026-01-17"
+  },
+
+  {
+    "orderId": "ORD-1003",
+    "customer": {
+      "name": "Usman Raza",
+      "email": "usman@gmail.com",
+      "phone": "0333-4445566",
+      "address": "Islamabad, Pakistan"
+    },
+    "items": [
+      {
+        "productId": 14,
+        "title": "Camera Phone Max",
+        "price": 105000,
+        "quantity": 1
+      }
+    ],
+    "subtotal": 105000,
+    "discount": 15750,
+    "total": 89250,
+    "paymentMethod": "JazzCash",
+    "status": "Shipped",
+    "orderDate": "2026-01-16"
+  },
+
+  {
+    "orderId": "ORD-1004",
+    "customer": {
+      "name": "Hassan Ali",
+      "email": "hassan@gmail.com",
+      "phone": "0345-8889990",
+      "address": "Multan, Pakistan"
+    },
+    "items": [
+      {
+        "productId": 32,
+        "title": "Leather Shoes",
+        "price": 13500,
+        "quantity": 1
+      },
+      {
+        "productId": 26,
+        "title": "Cotton Shirt",
+        "price": 3400,
+        "quantity": 2
+      }
+    ],
+    "subtotal": 20300,
+    "discount": 2000,
+    "total": 18300,
+    "paymentMethod": "Bank Transfer",
+    "status": "Delivered",
+    "orderDate": "2026-01-15"
+  },
+
+  {
+    "orderId": "ORD-1005",
+    "customer": {
+      "name": "Bilal Shah",
+      "email": "bilal@gmail.com",
+      "phone": "0312-5566778",
+      "address": "Faisalabad, Pakistan"
+    },
+    "items": [
+      {
+        "productId": 38,
+        "title": "Smart Watch",
+        "price": 15000,
+        "quantity": 1
+      },
+      {
+        "productId": 34,
+        "title": "Android Tablet 10 Inch",
+        "price": 48000,
+        "quantity": 1
+      }
+    ],
+    "subtotal": 63000,
+    "discount": 3000,
+    "total": 60000,
+    "paymentMethod": "EasyPaisa",
+    "status": "Cancelled",
+    "orderDate": "2026-01-14"
+  }
+]

@@ -1,0 +1,144 @@
+🧱 CORE MODULES
+👤 USER / AUTH MODULE
+
+Base route: /api/user
+
+Method	API	Purpose
+POST	/register	User signup
+POST	/login	User login
+GET	/profile	Logged in user data
+PUT	/profile	Update profile
+POST	/logout	Logout
+POST	/refresh-token	New JWT token
+🔐 ADMIN MODULE
+
+Base route: /api/admin
+
+Method	API	Purpose
+POST	/login	Admin login
+GET	/dashboard-stats	Dashboard data
+GET	/users	All users
+PUT	/users/:id/role	Change role
+DELETE	/users/:id	Delete user
+🛒 PRODUCT MODULE
+
+Base route: /api/product
+
+Method	API	Purpose
+GET	/	All products
+GET	/:id	Single product
+POST	/	Create product (admin)
+PUT	/:id	Update product (admin)
+DELETE	/:id	Delete product (admin)
+GET	/category/:id	Products by category
+GET	/search?q=	Search product
+📂 CATEGORY MODULE
+
+Base route: /api/category
+
+Method	API	Purpose
+GET	/	All categories
+POST	/	Create category
+PUT	/:id	Update category
+DELETE	/:id	Delete category
+🛍️ ORDER MODULE
+
+Base route: /api/order
+
+Method	API	Purpose
+POST	/	Place order
+GET	/my-orders	User orders
+GET	/	All orders (admin)
+GET	/:id	Order details
+PUT	/:id/status	Update order status
+💳 PAYMENT MODULE
+
+Base route: /api/payment
+
+Method	API	Purpose
+POST	/create-intent	Create payment
+POST	/verify	Verify payment
+GET	/history	Payment history
+❤️ EXTRA (REAL WORLD FEATURES)
+⭐ Reviews
+
+/api/review
+
+POST /
+
+GET /product/:id
+
+DELETE /:id
+
+🧾 Wishlist
+
+/api/wishlist
+
+POST /
+
+GET /
+
+DELETE /:id
+
+🛒 Cart
+
+/api/cart
+
+POST /add
+
+GET /
+
+DELETE /:id
+
+PUT /update
+
+🧠 Folder Structure (Professional)
+src/
+ ├─ models/
+ ├─ controllers/
+ ├─ routes/
+ ├─ middleware/
+ ├─ config/
+ ├─ utils/
+ ├─ app.js
+ └─ server.js
+
+🔐 Security Layers
+Feature	Status
+JWT Auth	✅
+Role based auth	✅
+Protected routes	✅
+Admin guard	✅
+Input validation	✅
+Rate limiting	optional
+CORS	optional
+🧭 Priority Order (Best Dev Flow)
+
+1️⃣ Auth (register/login/JWT)
+2️⃣ User profile
+3️⃣ Product CRUD
+4️⃣ Category
+5️⃣ Orders
+6️⃣ Payment
+7️⃣ Admin panel APIs
+
+🎯 Tumhare project ke hisaab se MVP APIs
+Minimum viable product:
+
+/api/user/register
+
+/api/user/login
+
+/api/user/profile
+
+/api/product
+
+/api/product/:id
+
+/api/order
+
+/api/order/my-orders
+
+/api/admin/login
+
+/api/admin/dashboard-stats

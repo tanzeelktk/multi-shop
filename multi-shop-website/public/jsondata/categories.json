@@ -1,0 +1,32 @@
+[
+    {
+        "id":1,
+        "title":"Mobile",
+        "count":100,
+        "image":"/images/categories/mobile5.jpg"
+    },
+    {
+        "id":2,
+        "title":"Camera",
+        "count":50,
+        "image":"/images/categories/camera.webp"
+    },
+    {
+        "id":3,
+        "title":"Makeup",
+        "count":70,
+        "image":"/images/categories/makeup.jpg"
+    },
+    {
+        "id":4,
+        "title":"Shoes",
+        "count":200,
+        "image":"/images/categories/shoes.webp"
+    },
+    {
+        "id":5,
+        "title":"Skincare",
+        "count":80,
+        "image":"/images/categories/skincare.jpg"
+    }
+]
