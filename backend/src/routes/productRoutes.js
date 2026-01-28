@@ -8,7 +8,7 @@ import {
   singleProduct,
   updateProduct,
 } from "../controllers/productController.js";
-import { checkRole, protect } from "../middlewares/auth.middleware.js";
+import { adminOnly, protect } from "../middlewares/auth.middleware.js";
 import { uploadProductImage } from "../middlewares/uploads.js";
 const productRouter = express.Router();
 
@@ -17,18 +17,18 @@ productRouter.get("/single-product/:id", singleProduct);
 productRouter.post(
   "/create",
   protect,
-  checkRole("admin"),
+  adminOnly,
   uploadProductImage.array("images"),
   createProduct,
 );
 productRouter.put(
   "/update/:id",
   protect,
-  checkRole("admin"),
+  adminOnly,
   uploadProductImage.array("images"),
   updateProduct,
 );
-productRouter.delete("/delete", protect, checkRole("admin"), deleteProduct);
+productRouter.delete("/delete", protect, adminOnly, deleteProduct);
 productRouter.get("/category/:id", productByCategory);
 productRouter.get("/search", searchProduct); //url will be /search?q=mobile
 

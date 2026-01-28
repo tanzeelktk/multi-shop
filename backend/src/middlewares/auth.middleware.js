@@ -24,14 +24,9 @@ export const protect = async (req, res, next) => {
   }
 };
 
-export const checkRole = (allowedRoles) => {
-  return (req, res, next) => {
-    if (!req.user) {
-      return res.status(401).json({ message: "Unathorized" });
-    }
-    if (!allowedRoles.includes(req.user.role)) {
-      return res.status(403).json({ message: "Forbidden: Insufficient role" });
-    }
-    next();
-  };
+export const adminOnly = (req, res, next) => {
+  if (req.user.role !== "admin") {
+    return res.status(403).json({ message: "Admin access required" });
+  }
+  next();
 };

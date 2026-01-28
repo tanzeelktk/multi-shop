@@ -6,28 +6,28 @@ import {
   updateCategory,
 } from "../controllers/categoryController.js";
 import { uploadCategoryImage } from "../middlewares/uploads.js";
-import { checkRole, protect } from "../middlewares/auth.middleware.js";
+import { adminOnly, protect } from "../middlewares/auth.middleware.js";
 const categoryRouter = express.Router();
 
 categoryRouter.get("/get-all", allCategories);
 categoryRouter.post(
   "/create",
   protect,
-  checkRole(["admin"]),
+  adminOnly,
   uploadCategoryImage.single("image"),
   createCategory,
 );
 categoryRouter.put(
   "/update/:id",
   protect,
-  checkRole(["admin"]),
+  adminOnly,
   uploadCategoryImage.single("image"),
   updateCategory,
 );
 categoryRouter.delete(
   "/delete/:id",
   protect,
-  checkRole(["admin"]),
+  adminOnly,
   deleteCategory,
 );
 

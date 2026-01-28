@@ -1,0 +1,86 @@
+📊 Core Admin Stats (Must Have)
+👥 Users
+
+Total users
+
+New users (today / this week / this month)
+
+Active vs inactive users (optional)
+
+totalUsers
+newUsersThisMonth
+
+🛒 Products
+
+Total products
+
+Active products
+
+Out of stock products
+
+totalProducts
+outOfStockProducts
+
+📦 Orders (Most Important)
+
+Total orders
+
+Today’s orders
+
+Pending orders
+
+Completed orders
+
+Cancelled orders
+
+totalOrders
+pendingOrders
+completedOrders
+
+💰 Revenue
+
+Total revenue
+
+Today’s revenue
+
+This month revenue
+
+Average order value (AOV)
+
+totalRevenue
+todayRevenue
+monthlyRevenue
+
+⭐ Reviews
+
+Total reviews
+
+Average rating
+
+Latest reviews (last 5)
+
+totalReviews
+averageRating
+
+🔥 Advanced / Optional Stats (CV booster)
+📈 Growth
+
+User growth %
+
+Revenue growth %
+
+🏆 Top Performing
+
+Top selling products
+
+Most reviewed products
+
+Highest rated products
+
+🚨 Alerts
+
+Low stock products
+
+Flagged / reported reviews
+
+Failed payments
