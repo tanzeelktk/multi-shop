@@ -28,15 +28,15 @@ const orderSchema = new mongoose.Schema(
     },
 
     paymentMethod: { type: String, required: true }, // "cod", "stripe", "paypal"
-    paymentResult: {
-      id: String,
-      status: String,
-      update_time: String,
-      email_address: String,
-    },
+    // paymentResult: {
+    //   id: String,
+    //   status: String,
+    //   update_time: String,
+    //   email_address: String,
+    // },
 
-    taxPrice: { type: Number, required: true, default: 0 },
-    shippingPrice: { type: Number, required: true, default: 0 },
+    //taxPrice: { type: Number, required: true, default: 0 },
+    shippingPrice: { type: Number, default: 0 },
     totalPrice: { type: Number, required: true, default: 0 },
 
     orderStatus: {

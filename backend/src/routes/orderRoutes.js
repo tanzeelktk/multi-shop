@@ -1,12 +1,18 @@
-import express from 'express'
-import { allOrders, placeOrder, singleOrder, updateOrderStatus, userOrders } from '../controllers/orderControllers.js'
-const ordersRouter = express.Router()
+import express from "express";
+import {
+  allOrders,
+  placeOrder,
+  singleOrder,
+  updateOrderStatus,
+  userOrders,
+} from "../controllers/orderControllers.js";
+import { adminOnly, protect } from "../middlewares/auth.middleware.js";
+const ordersRouter = express.Router();
 
-ordersRouter.post("/place-order", placeOrder)
-ordersRouter.get("/user-orders/:id", userOrders)
-ordersRouter.get("/get-all", allOrders)
-ordersRouter.get("/single-order/:id", singleOrder)
-ordersRouter.put("/update-status/:id", updateOrderStatus)
+ordersRouter.post("/place-order", protect, placeOrder);
+ordersRouter.get("/user-orders",protect, userOrders);
+ordersRouter.get("/get-all",protect, adminOnly, allOrders);
+ordersRouter.get("/single-order/:id",protect, singleOrder);
+ordersRouter.put("/update-status/:id",protect, adminOnly, updateOrderStatus);
 
-
-export default ordersRouter
+export default ordersRouter;
