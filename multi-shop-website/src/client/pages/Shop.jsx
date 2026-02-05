@@ -1,25 +1,25 @@
 import React, { useEffect, useState } from 'react'
 import ShowProducts from '../components/common/ShowProducts'
 import Paginaton from '../components/common/Paginaton';
+import axios from 'axios'
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 const Shop = () => {
   const [products, setProducts] = useState([])
+  const [page, setPage] = useState(1)
+  const [totalPages, setTotalPages] = useState(1)
 
-  const itemsPerPage = 9;
-  const [currentPage, setCurrentPage] = useState(1)
-  const indexOfLastItem = itemsPerPage * currentPage 
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage
-  console.log(indexOfFirstItem, indexOfLastItem)
-  const currentItems = products.slice(indexOfFirstItem, indexOfLastItem)
-
+  const API_URL = import.meta.env.VITE_API_URL
+  const limit = 9;
+ 
   useEffect(() => {
     getProducts()
-  }, [])
-  async function getProducts(params) {
+  }, [page])
+  async function getProducts() {
     try {
-      const res = await fetch("/jsondata/products.json")
-      if (!res.ok) throw new Error("Failed to get Products")
-      setProducts(await res.json())
+      const res = await axios.get(`${API_URL}/api/product/all-products?page=${page}&limit=${limit}`)
+      setProducts(res.data.products)
+      setTotalPages(res.data.pagination.totalPages)
     } catch (error) {
       console.log(error)
     }
@@ -83,18 +83,51 @@ const Shop = () => {
         <div className='col-span-3 pt-10'>
           <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
             {
-              currentItems.map((product, index) => {
+              products.map((product, index) => {
                 return (
 
-                  <ShowProducts product={product} key={index}/>
+                  <ShowProducts product={product} key={index} />
                 )
               })
             }
           </div>
-          <div className='mt-10'>
-              <Paginaton products={products.length} setCurrentPage={setCurrentPage} currentPage={currentPage} itemsPerPage={itemsPerPage}/>
+          <div className="flex gap-2 justify-center items-center mt-4 flex-wrap">
+
+            {/* Previous Button */}
+            <button
+              onClick={() => setPage(prev => Math.max(prev - 1, 1))}
+              disabled={page === 1}
+              className={`flex items-center px-3 py-1 rounded-md border border-gray-300 
+          ${page === 1 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-100'} transition`}
+            >
+              <ChevronLeft size={16} /> Prev
+            </button>
+
+            {/* Page Numbers */}
+            {[...Array(totalPages)].map((_, index) => (
+              <button
+                key={index}
+                onClick={() => setPage(index + 1)}
+                className={`px-3 py-1 rounded-md border transition
+            ${page === index + 1
+                    ? 'bg-blue-600 text-white border-blue-600 shadow'
+                    : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-100'} `}
+              >
+                {index + 1}
+              </button>
+            ))}
+
+            {/* Next Button */}
+            <button
+              onClick={() => setPage(prev => Math.min(prev + 1, totalPages))}
+              disabled={page === totalPages}
+              className={`flex items-center px-3 py-1 rounded-md border border-gray-300 
+          ${page === totalPages ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-100'} transition`}
+            >
+              Next <ChevronRight size={16} />
+            </button>
           </div>
-            
+
         </div>
       </div>
     </section>

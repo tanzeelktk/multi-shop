@@ -1,12 +1,12 @@
 import User from "../models/userModel.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import fs from "fs/promises"
+import fs from "fs/promises";
 
 export const register = async (req, res) => {
   try {
-    const { name, email, password } = req.body;
-    const image = req.file.destination + "/" + req.file.filename;
+    const { name, email, password } = req.body;    
+
     if (!name || !email || !password) {
       return res.status(400).json({ message: "All fields are required" });
     }
@@ -23,7 +23,6 @@ export const register = async (req, res) => {
       name,
       email,
       password: hashedPassword,
-      image,
     });
 
     const responseData = {
@@ -31,7 +30,6 @@ export const register = async (req, res) => {
       email: user.email,
       role: user.role,
       isACtive: user.isActive,
-      image: user.image,
     };
 
     const token = jwt.sign(
@@ -62,6 +60,10 @@ export const login = async (req, res) => {
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return res.status(400).json({ message: "Invalid credentials." });
+    }
+
+    if(!user.isActive){
+      return res.status(400).json({message:"You are not Allowed please contact Admin"})
     }
 
     const token = jwt.sign(
@@ -110,7 +112,7 @@ export const updateProfile = async (req, res) => {
       user.image = `uploads/users/${req.file.filename}`;
     }
 
-    await user.save()
+    await user.save();
 
     res.status(200).json({
       success: true,

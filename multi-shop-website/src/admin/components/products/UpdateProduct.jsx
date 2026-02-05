@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import {
     Button,
     Label,
@@ -9,22 +9,40 @@ import {
     TextInput
 } from "flowbite-react";
 import { ImagePlus } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
+import axios from 'axios'
 
-const UpdateProduct = ({ setOpenModal, openModal , product}) => {
+const UpdateProduct = ({ setOpenModal, openModal, product }) => {
 
     const [name, setName] = useState(product.title)
     const [price, setPrice] = useState(product.price)
     const [stock, setStock] = useState(5)
-    const [discount, setDiscount] = useState(product.discount)
+    const [discount, setDiscount] = useState(product.discountPercent || 0)
     const [category, setCategory] = useState(product.category)
-    const salePrice = Math.ceil(product.price - (product.price * discount / 100))
+    const salePrice = Math.ceil(product.price - (product.price * product.discountPercent / 100))
     const [shortDescription, setShortDescription] = useState(product.description)
     const [longDescription, setLongDescription] = useState(product.longDescription)
     const [productImages, setProductImages] = useState(product.images)
-    const [mainImage, setMainImage] = useState(product.mainImage)
+    const [mainImage, setMainImage] = useState(product?.images?.findIndex(img => img.main === true) || 0)
 
     const [currentImageIndex, setCurrentImageIndex] = useState(0)
+    const [categories, setCategories] = useState([])
+    const API_URL = import.meta.env.VITE_API_URL
+    const { token } = useAuth()
 
+
+    useEffect(() => {
+        getCategories()
+    }, [])
+
+    async function getCategories() {
+        try {
+            const res = await axios.get(`${API_URL}/api/categories/get-all`)
+            setCategories(res.data.categories)
+        } catch (error) {
+            console.log(error)
+        }
+    }
 
     function onCloseModal() {
         setOpenModal(false)
@@ -88,7 +106,7 @@ const UpdateProduct = ({ setOpenModal, openModal , product}) => {
                                 <div className="text-gray-500 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 flex flex-col items-center">
                                     <ImagePlus /> No image selected</div>) : (
                                 <>
-                                    <img src={productImages[currentImageIndex]} className='w-full h-full object-contain' alt="" />
+                                    <img src={`${API_URL}/${productImages[currentImageIndex].filename}`} className='w-full h-full object-contain' alt="" />
                                     <div className='absolute top-0 left-1/2 transform -translate-x-1/2  py-2 px-4 
                                     hover:cursor-pointer opacity-60 hover:opacity-100 bg-blue-500 text-white text-xs text-center transition-opacity duration-300'
                                         onClick={(e) => { e.stopPropagation(); handleMainImageChange(currentImageIndex) }}>Select For Thumbnail</div>
@@ -101,7 +119,7 @@ const UpdateProduct = ({ setOpenModal, openModal , product}) => {
                             productImages.map((image, index) => {
                                 return (
                                     <div className='w-15 h-15 relative' key={index} onClick={() => setCurrentImageIndex(index)}>
-                                        <img src={image} className='w-full h-full object-cover' alt="" />
+                                        <img src={`${API_URL}/${image.filename}`} className='w-full h-full object-cover' alt="" />
                                     </div>
                                 )
                             })
@@ -153,13 +171,23 @@ const UpdateProduct = ({ setOpenModal, openModal , product}) => {
                             {/* Category */}
                             <div>
                                 <Label htmlFor="category">Category</Label>
-                                <TextInput
+                                <select
                                     id="category"
                                     placeholder="Mobile"
                                     value={category}
                                     onChange={(e) => setCategory(e.target.value)}
                                     required
-                                />
+                                >
+                                    <option>Select Category</option>
+                                    {
+                                        categories && categories.map((catg, index) => {
+                                            return (
+                                                <option key={index} value={catg._id}>{catg.title}</option>
+                                            )
+
+                                        })
+                                    }
+                                </select>
                             </div>
                         </div>
                         <div className='flex flex-col gap-2'>
@@ -171,7 +199,6 @@ const UpdateProduct = ({ setOpenModal, openModal , product}) => {
                                     placeholder="10"
                                     value={discount}
                                     onChange={(e) => setDiscount(e.target.value)}
-                                    required
                                 />
                             </div>
                             <div>
@@ -181,8 +208,8 @@ const UpdateProduct = ({ setOpenModal, openModal , product}) => {
                                     placeholder="12345"
                                     type='number'
                                     value={salePrice}
-                                    onChange={(e) => setSalePrice(e.target.value)}
-                                    required
+                                    disabled
+
                                 />
                             </div>
                             <div>

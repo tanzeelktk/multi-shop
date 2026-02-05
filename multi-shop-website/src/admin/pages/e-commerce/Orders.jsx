@@ -12,6 +12,8 @@ import { EyeIcon, Search, Trash, FileText, Printer } from 'lucide-react'
 import React, { useEffect, useState } from 'react'
 import OrderDetail from '../../components/orders/OrderDetail'
 import Invoice from '../../components/orders/Invoice'
+import axios from 'axios'
+import { useAuth } from '../../context/AuthContext'
 
 const Orders = () => {
   const [ordersData, setOrdersData] = useState([])
@@ -31,6 +33,9 @@ const Orders = () => {
   const [currentPage, setCurrentPage] = useState(1)
   const itemsPerPage = 10
 
+  const { adminToken } = useAuth()
+  const API_URL = import.meta.env.VITE_API_URL
+
   useEffect(() => {
     fetchOrders()
   }, [])
@@ -41,24 +46,23 @@ const Orders = () => {
 
   async function fetchOrders() {
     try {
-      const res = await fetch('/jsondata/orders.json')
-      if (!res.ok) throw new Error('Failed to fetch orders')
-      const data = await res.json()
-      setOrdersData(data)
+      const res = await axios.get(`${API_URL}/api/orders/get-all`, { headers: { Authorization: `Bearer ${adminToken}` } })
+      console.log(res.data.orders)
+      setOrdersData(res.data.orders)
     } catch (error) {
       console.log('Error fetching orders:', error)
     }
   }
 
   const applyFilters = () => {
-    let temp = ordersData.filter(order =>
-      order.customer.name.toLowerCase().includes(search.toLowerCase())
-    )
-    if (statusFilter !== 'All') {
-      temp = temp.filter(order => order.status === statusFilter)
-    }
-    setFilteredOrders(temp)
-    setCurrentPage(1) // reset page
+    // let temp = ordersData.filter(order =>
+    //   order.customer.name.toLowerCase().includes(search.toLowerCase())
+    // )
+    // if (statusFilter !== 'All') {
+    //   temp = temp.filter(order => order.status === statusFilter)
+    // }
+    // setFilteredOrders(temp)
+    // setCurrentPage(1) // reset page
   }
 
   // Pagination logic
@@ -72,9 +76,10 @@ const Orders = () => {
     switch (status) {
       case 'Completed': return 'bg-green-100 text-green-600'
       case 'Pending': return 'bg-yellow-100 text-yellow-600'
-      case 'Shipped': return 'bg-blue-100 text-blue-600'
+      case 'Shipped' : return "bg-purple-100 text-purple-600"
+      case 'Processing': return 'bg-blue-100 text-blue-600'
       case 'Cancelled': return 'bg-red-100 text-red-600'
-      case 'Delivered': return 'bg-pink-100 text-pink-600'
+      case 'Delivered': return 'bg-indigo-100 text-indigo-600'
       default: return ''
     }
   }
@@ -149,6 +154,8 @@ const Orders = () => {
           openModal={openOrderDetailModal}
           setOpenModal={setOpenOrderDetailModal}
           order={currentOrder}
+          setOrder={setCurrentOrder}
+          fetchOrders={fetchOrders}
         />
       )}
 
@@ -193,7 +200,7 @@ const Orders = () => {
         <Table>
           <TableHead className="sticky top-0 bg-white z-10">
             <TableRow>
-              <TableHeadCell>ID</TableHeadCell>
+              <TableHeadCell>Sr.</TableHeadCell>
               <TableHeadCell>Customer</TableHeadCell>
               <TableHeadCell>Subtotal</TableHeadCell>
               <TableHeadCell>Total</TableHeadCell>
@@ -203,22 +210,26 @@ const Orders = () => {
             </TableRow>
           </TableHead>
           <TableBody className="divide-y">
-            {currentOrders.length > 0 ? (
-              currentOrders.map((order, index) => (
+            {ordersData.length > 0 ? (
+              ordersData.map((order, index) => (
                 <TableRow
-                  key={order.orderId}
+                  key={order._id}
                   className={`transition hover:bg-blue-50 ${index % 2 === 0 ? 'bg-gray-100' : 'bg-white'}`}
                 >
-                  <TableCell>{order.orderId}</TableCell>
-                  <TableCell>{order.customer.name}</TableCell>
-                  <TableCell>${order.subtotal}</TableCell>
-                  <TableCell>${order.total}</TableCell>
+                  <TableCell>{index + 1}</TableCell>
+                  <TableCell>{order.user.name}</TableCell>
+                  <TableCell>${order.shippingPrice}</TableCell>
+                  <TableCell>${order.totalPrice}</TableCell>
                   <TableCell>
-                    <span className={`px-3 py-1 rounded-full text-xs font-semibold ${statusBadge(order.status)}`}>
-                      {order.status}
+                    <span className={`px-3 py-1 rounded-full text-xs font-semibold ${statusBadge(order.orderStatus)}`}>
+                      {order.orderStatus}
                     </span>
                   </TableCell>
-                  <TableCell>{new Date(order.orderDate).toLocaleDateString()}</TableCell>
+                  <TableCell>{new Date(order.createdAt).toLocaleDateString("en-GB", {
+                    day: "2-digit",
+                    month: "short",
+                    year: "numeric"
+                  })}</TableCell>
                   <TableCell className="flex gap-2">
                     <EyeIcon
                       title="View Order"

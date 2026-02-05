@@ -8,8 +8,12 @@ import {
   Modal,
   ModalBody
 } from 'flowbite-react'
-import { Edit, Trash, Search, Plus } from 'lucide-react'
+import { Edit, Trash, Search, Plus, EyeIcon } from 'lucide-react'
 import React, { useEffect, useState } from 'react'
+import AddCategory from '../../components/category/AddCategory'
+import { useAuth } from '../../context/AuthContext'
+import axios from 'axios'
+import ViewCategory from '../../components/category/ViewCategory'
 
 const Categories = () => {
 
@@ -18,17 +22,21 @@ const Categories = () => {
 
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [deleteId, setDeleteId] = useState(null)
+  const [addCategoryModal, setAddCategoryModal] = useState(false)
+  const [currentCategory, setCurrentCategory] = useState("")
+  const [viewCategoryModal, setViewCategoryModal] = useState(false)
+
+  const { adminToken } = useAuth
+  const API_URL = import.meta.env.VITE_API_URL
 
   useEffect(() => {
-    fetchCategories()
+    getCategories()
   }, [])
 
-  async function fetchCategories() {
+  async function getCategories() {
     try {
-      const res = await fetch('/jsondata/categories.json')
-      if (!res.ok) throw new Error('Failed to fetch categories')
-      const data = await res.json()
-      setCategories(data)
+      const res = await axios.get(`${API_URL}/api/categories/get-all`)
+      setCategories(res.data.categories)
     } catch (error) {
       console.log("Error fetching categories:", error)
     }
@@ -41,6 +49,8 @@ const Categories = () => {
   return (
     <section className="flex flex-col gap-5">
 
+      <AddCategory openModal={addCategoryModal} setOpenModal={setAddCategoryModal} getCategories={getCategories} />
+      <ViewCategory openModal={viewCategoryModal} setOpenModal={setViewCategoryModal} category={currentCategory} setCategory={setCurrentCategory} getCategories={getCategories} />
       {/* Header */}
       <div className="flex flex-wrap gap-3 justify-between items-center">
         <h1 className="font-bold text-lg">Categories</h1>
@@ -59,7 +69,7 @@ const Categories = () => {
           </div>
 
           {/* Add Button */}
-          <button className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded text-sm hover:bg-blue-700">
+          <button onClick={() => setAddCategoryModal(true)} className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded text-sm hover:bg-blue-700">
             <Plus size={16} /> Add Category
           </button>
 
@@ -129,9 +139,10 @@ const Categories = () => {
 
                   <TableCell className="flex gap-2">
 
-                    <Edit
+                    <EyeIcon
                       title="Edit"
                       className="p-2 w-9 h-9 rounded hover:bg-gray-200 cursor-pointer"
+                      onClick={() => { setCurrentCategory(category); setViewCategoryModal(true) }}
                     />
 
                     <Trash

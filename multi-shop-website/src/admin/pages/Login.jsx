@@ -1,15 +1,17 @@
 import React, { useEffect, useState } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { Navigate, useNavigate } from 'react-router-dom'
+import axios from 'axios'
 
 const Login = () => {
     const [userName, setUserName] = useState("")
     const [password, setPassword] = useState("")
-    const { user, login, loading} = useAuth()
+    const { admin, adminLogin, loading } = useAuth()
     const navigate = useNavigate()
+    const API_URL = import.meta.env.VITE_API_URL
 
     useEffect(() => {
-        if (user) {
+        if (admin) {
             navigate('/admin/dashboard', { replace: true })
         }
     }, [])
@@ -19,8 +21,20 @@ const Login = () => {
             alert("Please enter username or password")
             return
         }
-        login({ userName: userName, image:"/images/admin/admin1.png" })
-        navigate('/admin/dashboard', { replace: true })
+        try {
+            const user = await axios.post(`${API_URL}/api/admin/login`, { email: userName, password },
+                {
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                })
+            console.log(user.data)
+            adminLogin(user.data)
+            navigate('/admin/dashboard', { replace: true })
+        } catch (error) {
+            console.log(error.message);
+        }
+
     }
     return (
         <section className='flex items-center justify-center min-h-screen bg-gray-100'>

@@ -3,8 +3,9 @@ import React, { useEffect, useState } from 'react'
 import { Table, TableBody, TableCell, TableHead, TableHeadCell, TableRow, Modal, ModalBody } from 'flowbite-react'
 import AddNewProduct from '../../components/products/AddNewProduct'
 import ProductDetail from '../../components/products/ProductDetail'
-import UpdateProduct from '../../components/products/UpdateProduct'
 import Paginaton from '../../../client/components/common/Paginaton'
+import { useAuth } from '../../context/AuthContext'
+import axios from 'axios'
 
 const Products = () => {
   const [products, setProducts] = useState([])
@@ -12,76 +13,39 @@ const Products = () => {
 
   const [openNewProductModal, setOpenNewProductModal] = useState(false)
   const [openProductDetailModal, setOpenProductDetailModal] = useState(false)
-  const [openUpdateProductModal, setOpenUpdateProductModal] = useState(false)
   const [selectedProduct, setSelectedProduct] = useState(null)
 
   const [search, setSearch] = useState('')
   const [categoryFilter, setCategoryFilter] = useState('All')
 
-  const [confirmDelete, setConfirmDelete] = useState(false)
-  const [deleteId, setDeleteId] = useState(null)
+  const [page, setPage] = useState(1)
+  const [totalPages, setTotalPages] = useState(1)
 
-  const itemsPerPage = 10
-  const [currentPage, setCurrentPage] = useState(1)
-  const indexOfLastItem = currentPage * itemsPerPage
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage
-  const currentItems = filteredProducts.slice(indexOfFirstItem, indexOfLastItem)
+  const API_URL = import.meta.env.VITE_API_URL
+  const { adminToken } = useAuth()
 
   useEffect(() => {
     getProducts()
-  }, [])
+  }, [page])
 
-  useEffect(() => {
-    applyFilters()
-  }, [products, search, categoryFilter])
+
 
   async function getProducts() {
     try {
-      const res = await fetch('/jsondata/products.json')
-      if (!res.ok) throw new Error("Failed to fetch products")
-      const data = await res.json()
-      setProducts(data)
+      const res = await axios.get(`${API_URL}/api/product/all-products?page=${page}&limit=${10}`)
+      setProducts(res.data.products)
+      setTotalPages(res.data.pagination.totalPages)
     } catch (error) {
       console.log("Error fetching products:", error)
     }
   }
 
   const applyFilters = () => {
-    let temp = products.filter(p =>
-      p.title.toLowerCase().includes(search.toLowerCase())
-    )
-    if (categoryFilter !== 'All') {
-      temp = temp.filter(p => p.category === categoryFilter)
-    }
-    setFilteredProducts(temp)
-    setCurrentPage(1)
-  }
 
-  const handleDelete = (id) => {
-    setProducts(prev => prev.filter(p => p.id !== id))
-    setConfirmDelete(false)
   }
 
   const exportCSV = () => {
-    if (filteredProducts.length === 0) return
-    const csvData = filteredProducts.map(p => ({
-      ID: p.id,
-      Name: p.title,
-      Category: p.category,
-      Stock: 5,
-      Price: p.price,
-      Discount: p.discount,
-      SalePrice: (p.price - (p.price * p.discount / 100)).toFixed(2)
-    }))
-    const csvContent = [
-      Object.keys(csvData[0]).join(','),
-      ...csvData.map(item => Object.values(item).join(','))
-    ].join('\n')
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
-    const link = document.createElement('a')
-    link.href = URL.createObjectURL(blob)
-    link.setAttribute('download', 'products.csv')
-    link.click()
+
   }
 
   return (
@@ -113,9 +77,7 @@ const Products = () => {
               className="border px-3 py-2 rounded text-sm"
             >
               <option>All</option>
-              {[...new Set(products.map(p => p.category))].map((cat, idx) => (
-                <option key={idx}>{cat}</option>
-              ))}
+              { }
             </select>
 
             {/* Add Product */}
@@ -137,22 +99,13 @@ const Products = () => {
         </div>
 
         {/* Modals */}
-        {openNewProductModal && <AddNewProduct setOpenModal={setOpenNewProductModal} openModal={openNewProductModal} />}
-        {openProductDetailModal && <ProductDetail setOpenModal={setOpenProductDetailModal} openModal={openProductDetailModal} product={selectedProduct} />}
-        {openUpdateProductModal && <UpdateProduct setOpenModal={setOpenUpdateProductModal} openModal={openUpdateProductModal} product={selectedProduct} />}
-        {confirmDelete && (
-          <Modal show={confirmDelete} size="sm" onClose={() => setConfirmDelete(false)}>
-            <ModalBody className="text-center space-y-4">
-              <p className="font-semibold">Delete this product?</p>
-              <p className="text-sm text-gray-500">This action cannot be undone.</p>
-              <div className="flex justify-center gap-3">
-                <button className="border px-4 py-2 rounded" onClick={() => setConfirmDelete(false)}>Cancel</button>
-                <button className="bg-red-500 text-white px-4 py-2 rounded" onClick={() => handleDelete(deleteId)}>Delete</button>
-              </div>
-            </ModalBody>
-          </Modal>
-        )}
-
+        {openNewProductModal && <AddNewProduct setOpenModal={setOpenNewProductModal} openModal={openNewProductModal} getProducts={getProducts} />}
+        {openProductDetailModal && <ProductDetail
+          setOpenModal={setOpenProductDetailModal}
+          openModal={openProductDetailModal}
+          product={selectedProduct}
+          getProducts={getProducts}
+          setSelectedProduct={setSelectedProduct} />}
         {/* Table */}
         <div className="overflow-x-auto rounded shadow">
           <Table>
@@ -169,27 +122,31 @@ const Products = () => {
               </TableRow>
             </TableHead>
             <TableBody className="divide-y">
-              {currentItems.length > 0 ? currentItems.map((product, idx) => (
-                <TableRow key={product.id} className={`transition hover:bg-blue-50 ${idx % 2 === 0 ? 'bg-gray-100' : 'bg-white'}`}>
-                  <TableCell>{product.id}</TableCell>
-                  <TableCell>{product.title}</TableCell>
-                  <TableCell>{product.category}</TableCell>
+              {products.length > 0 ? products.map((product, idx) => (
+                <TableRow key={product._id} className={`transition hover:bg-blue-50 ${idx % 2 === 0 ? 'bg-gray-100' : 'bg-white'}`}>
+                  <TableCell>{idx + 1}</TableCell>
+                  <TableCell className='flex gap-1'>
+                    <div><img
+                      src={`${API_URL}/${product.images?.find(i => i.main)?.filename}`}
+                      className="w-10 h-10 rounded object-contain"
+                    /></div>
+                    {product.title}
+                  </TableCell>
+                  <TableCell>{product.category.title}</TableCell>
                   <TableCell>
                     <span className={`px-2 py-1 rounded text-xs font-semibold ${5 < 10 ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-600'}`}>
                       5
                     </span>
                   </TableCell>
                   <TableCell>${product.price}</TableCell>
-                  <TableCell>{product.discount}%</TableCell>
-                  <TableCell>${(product.price - (product.price * product.discount / 100)).toFixed(2)}</TableCell>
+                  <TableCell>{product.discountPercent}%</TableCell>
+                  <TableCell>${(product.price - (product.price * product.discountPercent / 100)).toFixed(2)}</TableCell>
                   <TableCell className="flex gap-2">
                     <EyeIcon className="p-2 w-9 h-9 rounded hover:bg-gray-200 cursor-pointer" onClick={() => { setOpenProductDetailModal(true); setSelectedProduct(product) }} />
-                    <Edit className="p-2 w-9 h-9 rounded hover:bg-gray-200 cursor-pointer" onClick={() => { setOpenUpdateProductModal(true); setSelectedProduct(product) }} />
-                    <Trash className="p-2 w-9 h-9 rounded hover:bg-red-100 text-red-500 cursor-pointer" onClick={() => { setConfirmDelete(true); setDeleteId(product.id) }} />
                   </TableCell>
                 </TableRow>
               )) : (
-                <TableRow>
+                <TableRow key="">
                   <TableCell colSpan={8}>
                     <div className="text-center py-4 text-gray-500">No Product Available</div>
                   </TableCell>
@@ -199,14 +156,34 @@ const Products = () => {
           </Table>
         </div>
 
-        {/* Pagination */}
-        <Paginaton
-          products={filteredProducts.length}
-          currentPage={currentPage}
-          setCurrentPage={setCurrentPage}
-          itemsPerPage={itemsPerPage}
-        />
+        {/*Pagination*/}
+        <div className="flex gap-2 mt-5 justify-center">
+          <button
+            disabled={page === 1}
+            onClick={() => setPage(page - 1)}
+            className="px-3 py-1 rounded bg-gray-300 disabled:opacity-50"
+          >
+            Prev
+          </button>
 
+          {Array.from({ length: totalPages }, (_, i) => (
+            <button
+              key={i}
+              onClick={() => setPage(i + 1)}
+              className={`px-3 py-1 rounded
+              ${page === i + 1 ? "bg-blue-500 text-white" : "bg-gray-200"}`}>
+              {i + 1}
+            </button>
+          ))}
+
+          <button
+            disabled={page === totalPages}
+            onClick={() => setPage(page + 1)}
+            className="px-3 py-1 rounded bg-gray-300 disabled:opacity-50"
+          >
+            Next
+          </button>
+        </div>
       </div>
     </section>
   )

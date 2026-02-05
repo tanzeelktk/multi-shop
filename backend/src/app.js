@@ -7,8 +7,16 @@ import adminRouter from "./routes/adminRoutes.js";
 import reviewRouter from "./routes/reviewRoutes.js";
 import path from "path";
 import { fileURLToPath } from "url";
+import cors from "cors";
 
 const app = express();
+
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+    credentials: true,
+  }),
+);
 app.use(express.json());
 
 // __dirname fix for ES module

@@ -3,6 +3,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react'
 
 const ProductGallery = ({images}) => {
     const [currentIndex, setCurrentIndex] = useState(0)
+    const API_URL = import.meta.env.VITE_API_URL
     
 
     const nextImage = () => {
@@ -13,9 +14,9 @@ const ProductGallery = ({images}) => {
     }
     return (
         <div className='flex flex-col items-center justify-center gap-2'>
-            <div className='w-150 h-150 relative border border-gray-300 rounded-xl'>
+            <div className='w-120 h-120 relative border border-gray-300 rounded-xl'>
                 <img
-                    src={images[currentIndex]}
+                    src={`${API_URL}/${images[currentIndex].filename}`}
                     className='w-full h-full object-cover rounded-xl transition-all duration-300'
                 />
                 {/* ARROWS */}
@@ -39,7 +40,7 @@ const ProductGallery = ({images}) => {
                       ${currentIndex === index ? "border-blue-600 scale-105" : "border-gray-400"}  rounded-sm transition-all duration-300`} key={index}
                                 onClick={() => setCurrentIndex(index)}
                             >
-                                <img src={image} className='w-full h-full object-cover rounded-sm' />
+                                <img src={`${API_URL}/${image.filename}`} className='w-full h-full object-cover rounded-sm' />
                             </div>
                         )
                     })

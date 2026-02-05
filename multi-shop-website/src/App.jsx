@@ -23,6 +23,7 @@ import Settings from './admin/pages/Settings.jsx'
 import Login from './admin/pages/Login.jsx'
 import ProtectedRoutes from './admin/components/ProtectedRoutes.jsx'
 import Loading from './admin/components/Loading.jsx'
+import UserOrders from './client/pages/UserOrders.jsx'
 
 function App() {
   const [count, setCount] = useState(0)
@@ -40,9 +41,10 @@ function App() {
             <Route path='/product/:id' element={<Product />} />
             <Route path='/cart' element={<Cart />} />
             <Route path='/checkout' element={<Checkout />} />
+            <Route path='/orders' element={<UserOrders />} />
           </Route>
           <Route path='/admin/login' element={<Login />} />
-          <Route path='/loading' element={<Loading/>}/>
+          <Route path='/loading' element={<Loading />} />
 
           <Route element={<ProtectedRoutes><AdminLayout /></ProtectedRoutes>}>
             <Route path='/admin/dashboard' element={<AdminDashboard />} />
@@ -53,6 +55,7 @@ function App() {
             <Route path='/admin/user-management' element={<UserManagement />} />
             <Route path='/admin/security' element={<Security />} />
             <Route path='/admin/settings' element={<Settings />} />
+
           </Route>
         </Routes>
       </BrowserRouter>

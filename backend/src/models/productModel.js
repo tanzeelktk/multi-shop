@@ -14,6 +14,11 @@ const productSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    status:{
+      type:String,
+      default:"Active",
+      enum:["Active", "inActive"]
+    },
     category: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Category",

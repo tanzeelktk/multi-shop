@@ -7,10 +7,11 @@ import { useNavigate } from 'react-router-dom';
 const Header = ({ mobileMenuOpen, setMobileMenuOpen }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [openDropDown, setOpenDropDown] = useState(false);
-  const { user, logout } = useAuth()
+  const { admin, adminLogout } = useAuth()
   const navigate = useNavigate()
+  const API_URL = import.meta.env.VITE_API_URL
   function handleLogout() {
-    logout()
+    adminLogout()
     navigate('/admin/login')
   }
 
@@ -56,7 +57,7 @@ const Header = ({ mobileMenuOpen, setMobileMenuOpen }) => {
 
           <div className='flex gap-2 relative'>
             <div className='relative w-7 h-7 rounded-full bg-amber-200'>
-              <img src={user.image} className='w-full h-full object-contain rounded-full' />
+              <img src={`${API_URL}/${admin.image}`} className='w-full h-full object-contain rounded-full' />
             </div>
             <button onClick={() => setOpenDropDown(!openDropDown)}>
               <ChevronDown size={15} className={`${openDropDown ? "rotate-180" : ""} transition-all duration-300`} />

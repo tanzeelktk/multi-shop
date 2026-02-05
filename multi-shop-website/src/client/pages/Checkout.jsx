@@ -1,11 +1,53 @@
-import React from 'react'
+import React, { useState } from 'react'
+import { useAuth } from '../../admin/context/AuthContext'
+import axios from 'axios'
 
 const Checkout = () => {
     const cart = JSON.parse(localStorage.getItem('cart')) || []
-
     const subTotal = cart.reduce((total, item) => total + (item.finalPrice * item.qty), 0)
     const shipping = cart.length > 0 ? 10 : 0
     const total = subTotal + shipping
+    const API_URL = import.meta.env.VITE_API_URL
+
+    const { user, userToken } = useAuth()
+
+    const [paymentMethod, setPaymentMethod] = useState('cod')
+    const products = cart.map((item) => {
+        return {
+            product: item._id,
+            name: item.title,
+            quantity: item.qty,
+            price: item.finalPrice,
+            image: item.images.find(image => image.main)?.filename,
+        }
+    })
+    const [shippingAddress, setShippingAddress] = useState({
+        name: '',
+        email: '',
+        mobile: '',
+        address: '',
+        country: '',
+        city: '',
+        postalCode: ''
+    })
+
+    function handleChange(e) {
+        const { name, value } = e.target
+        setShippingAddress(prev => ({ ...prev, [name]: value }))
+    }
+
+
+    async function handlePlaceOrder() {
+        if (!user) return alert("Please login")
+        try {
+            const res = await axios.post(`${API_URL}/api/orders/place-order`,
+                { products, paymentMethod, shippingAddress, shippingPrice: shipping },
+                { headers: { Authorization: `Bearer ${userToken}` } })
+                alert("Order placed")
+        } catch (error) {
+            console.log(error.response)
+        }
+    }
 
     return (
         <section className='w-[90%]'>
@@ -17,59 +59,88 @@ const Checkout = () => {
                         <div className='absolute border-t border-dashed w-full z-0'></div>
                     </div>
                     <div className='bg-white py-10 px-5 flex flex-col gap-4 text-[#3d464d] text-[14px]'>
-                        <div className='flex gap-10 items-center justify-center'>
-                            <div className='w-full flex flex-col gap-2 items-start'>
-                                <label>First Name</label>
-                                <input type='text' placeholder='Jhon' className='border border-gray-300 w-full py-1 px-3 focus:outline-none focus:border-orange-300' />
-                            </div>
-                            <div className='w-full flex flex-col gap-2 items-start'>
-                                <label>Last Name</label>
-                                <input type='text' placeholder='Doe' className='border border-gray-300 w-full py-1 px-3 focus:outline-none focus:border-orange-300' />
-                            </div>
-                        </div>
-                        <div className='flex gap-10 items-center justify-center'>
-                            <div className='w-full flex flex-col gap-2 items-start'>
-                                <label>E-mail</label>
-                                <input type='email' placeholder='example@email.com' className='border border-gray-300 w-full py-1 px-3 focus:outline-none focus:border-orange-300' />
-                            </div>
-                            <div className='w-full flex flex-col gap-2 items-start'>
-                                <label>Mobile No</label>
-                                <input type='text' placeholder='+1234567890' className='border border-gray-300 w-full py-1 px-3 focus:outline-none focus:border-orange-300' />
+                        <div className='flex gap-10 items-center '>
+                            <div className='w-full md:w-1/2 flex flex-col gap-2 items-start'>
+                                <label htmlFor='name'>Full Name</label>
+                                <input id='name'
+                                    name='name'
+                                    value={shippingAddress.name}
+                                    onChange={(e) => handleChange(e)}
+                                    type='text'
+                                    placeholder='Jhon'
+                                    className='border border-gray-300 w-full py-1 px-3 focus:outline-none focus:border-orange-300' />
                             </div>
                         </div>
                         <div className='flex gap-10 items-center justify-center'>
                             <div className='w-full flex flex-col gap-2 items-start'>
-                                <label>Address Line 1</label>
-                                <input type='text' placeholder='123 Street' className='border border-gray-300 w-full py-1 px-3 focus:outline-none focus:border-orange-300' />
+                                <label htmlFor='email'>E-mail</label>
+                                <input id='email'
+                                    name='email'
+                                    type='email'
+                                    value={shippingAddress.email}
+                                    onChange={(e) => handleChange(e)}
+                                    placeholder='example@email.com'
+                                    className='border border-gray-300 w-full py-1 px-3 focus:outline-none focus:border-orange-300' />
                             </div>
                             <div className='w-full flex flex-col gap-2 items-start'>
-                                <label>Address Line 2</label>
-                                <input type='text' placeholder='123 Street' className='border border-gray-300 w-full py-1 px-3 focus:outline-none focus:border-orange-300' />
+                                <label htmlFor='mobile'>Mobile No</label>
+                                <input id='mobile'
+                                    name='mobile'
+                                    type='text'
+                                    value={shippingAddress.mobile}
+                                    onChange={(e) => handleChange(e)}
+                                    placeholder='+1234567890'
+                                    className='border border-gray-300 w-full py-1 px-3 focus:outline-none focus:border-orange-300' />
                             </div>
                         </div>
                         <div className='flex gap-10 items-center justify-center'>
                             <div className='w-full flex flex-col gap-2 items-start'>
-                                <label>Country</label>
-                                <select className='border border-gray-300 w-full py-1 px-3 focus:outline-none focus:border-orange-300' >
-                                    <option>United States</option>
-                                    <option>India</option>
-                                    <option>Canada</option>
-                                    <option>UK</option>
+                                <label htmlFor='address'>Address </label>
+                                <input id='address'
+                                    name='address'
+                                    type='text'
+                                    value={shippingAddress.address}
+                                    onChange={(e) => handleChange(e)}
+                                    placeholder='123 Street'
+                                    className='border border-gray-300 w-full py-1 px-3 focus:outline-none focus:border-orange-300' />
+                            </div>
+                        </div>
+                        <div className='flex gap-10 items-center justify-center'>
+                            <div className='w-full flex flex-col gap-2 items-start'>
+                                <label htmlFor='country'>Country</label>
+                                <select id='country'
+                                    name='country'
+                                    value={shippingAddress.country}
+                                    onChange={(e) => handleChange(e)}
+                                    className='border border-gray-300 w-full py-1 px-3 focus:outline-none focus:border-orange-300' >
+                                    <option value={''}>Select Country</option>
+                                    <option value={"United States"}>United States</option>
+                                    <option value={"India"}>India</option>
+                                    <option value={"Pakistan"}>Pakistan</option>
+                                    <option value={"Bangladesh"}>Bangladesh</option>
                                 </select>
                             </div>
                             <div className='w-full flex flex-col gap-2 items-start'>
-                                <label>City</label>
-                                <input type='text' placeholder='New York' className='border border-gray-300 w-full py-1 px-3 focus:outline-none focus:border-orange-300' />
+                                <label htmlFor='city'>City</label>
+                                <input id='city'
+                                    name='city'
+                                    type='text'
+                                    value={shippingAddress.city}
+                                    onChange={(e) => handleChange(e)}
+                                    placeholder='New York'
+                                    className='border border-gray-300 w-full py-1 px-3 focus:outline-none focus:border-orange-300' />
                             </div>
                         </div>
                         <div className='flex gap-10 items-center justify-center'>
                             <div className='w-full flex flex-col gap-2 items-start'>
-                                <label>State</label>
-                                <input type='text' placeholder='New York' className='border border-gray-300 w-full py-1 px-3 focus:outline-none focus:border-orange-300' />
-                            </div>
-                            <div className='w-full flex flex-col gap-2 items-start'>
-                                <label>Zip Code</label>
-                                <input type='text' placeholder='123' className='border border-gray-300 w-full py-1 px-3 focus:outline-none focus:border-orange-300' />
+                                <label htmlFor='postalCode'>Postal Code</label>
+                                <input id='postalCode'
+                                    name='postalCode'
+                                    type='text'
+                                    value={shippingAddress.postalCode}
+                                    onChange={(e) => handleChange(e)}
+                                    placeholder='123'
+                                    className='border border-gray-300 w-full py-1 px-3 focus:outline-none focus:border-orange-300' />
                             </div>
                         </div>
                         <div className='w-full flex flex-col items-start gap-3'>
@@ -97,7 +168,7 @@ const Checkout = () => {
                                     })
                                 }
 
-                               
+
                             </div>
                             <hr className='w-full text-gray-400' />
                             <div className='flex flex-col gap-4 text-[15px] font-semibold'>
@@ -120,7 +191,8 @@ const Checkout = () => {
                                 <div className='flex items-center gap-2'><input type="radio" name="payment" />Cash on Delivery</div>
                             </div>
                             <div>
-                                <button className='text-[#3d464d] py-4 w-full font-semibold
+                                <button onClick={handlePlaceOrder}
+                                    className='text-[#3d464d] py-4 w-full font-semibold
                          bg-[#ffd333] hover:bg-[#ffc800] hover:cursor-pointer'>Place Order</button>
                             </div>
                         </div>

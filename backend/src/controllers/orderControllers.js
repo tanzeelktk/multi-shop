@@ -9,7 +9,7 @@ export const placeOrder = async (req, res) => {
 
     //validation
     if (!products || products.length === 0) {
-      return res.status(400).json({ message: "No order item" });
+      return res.status(400).json({ message: "No order items" });
     }
 
     //calculate total price
@@ -17,11 +17,13 @@ export const placeOrder = async (req, res) => {
       (acc, item) => acc + item.price * item.quantity,
       0,
     );
-
+    const orderId =
+      "ORD-" + Date.now() + "-" + Math.floor(Math.random() * 10000) + 1;
     const totalPrice = itemsPrice + (shippingPrice || 0);
-
+    console.log(req.body);
     //create order
     const order = await Order.create({
+      orderId,
       user: id,
       products,
       shippingAddress,
@@ -29,16 +31,27 @@ export const placeOrder = async (req, res) => {
       shippingPrice,
       totalPrice,
     });
+
     res.status(201).json({ message: "Order placed successfully", order });
   } catch (error) {
-    res.status(500).json({ message: "Server error" });
+    res.status(500).json({ message: "Server error", error });
   }
 };
 
 export const userOrders = async (req, res) => {
   try {
     const id = req.user._id;
-    const orders = await Order.find({ user: id });
+    const { status } = req.query;
+    let orders;
+    if (status !== undefined) {
+      orders = await Order.find({ user: id, orderStatus: status }).populate(
+        "user",
+        "name email",
+      );
+    } else {
+      orders = await Order.find({ user: id });
+    }
+
     res.status(200).json({ orders });
   } catch (error) {
     res.status(500).json({ message: "Server error" });
@@ -47,7 +60,7 @@ export const userOrders = async (req, res) => {
 
 export const allOrders = async (req, res) => {
   try {
-    const orders = await Order.find();
+    const orders = await Order.find().populate("user", "name email");
     res.status(200).json({ orders });
   } catch (error) {
     res.status(500).json({ message: "Server error" });
@@ -77,47 +90,47 @@ export const singleOrder = async (req, res) => {
 
 export const updateOrderStatus = async (req, res) => {
   try {
-    const { id } = req.params;  //order id
+    const { id } = req.params; //order id
     const { status } = req.body;
-    if (!mongoose.Schema.Types.ObjectId(id)) {
-      return res.status(400).json({ message: "Invalid order ID" });
-    }
 
     const allowedStatus = [
-      "pending",
-      "processing",
-      "shipped",
-      "delivered",
-      "cancelled",
+      "Pending",
+      "Processing",
+      "Shipped",
+      "Delivered",
+      "Cancelled",
+      "Completed",
     ];
 
-    if(!allowedStatus.includes(status)){
-        return res.status(400).json({message:"Invalid order status"})
+    if (!allowedStatus.includes(status)) {
+      return res.status(400).json({ message: "Invalid order status" });
     }
 
-    const order = await Order.findById(id)
-    if(!order){
-        return res.status(404).json({message:"Order not found"})
+    const order = await Order.findById(id);
+    if (!order) {
+      return res.status(404).json({ message: "Order not found" });
     }
-    order.status = status
-    if(status==="delivered"){
-        order.deliveredAt = new Date()
+    order.orderStatus = status;
+    if (status === "Delivered") {
+      order.deliveredAt = new Date();
 
-        if(order.paymentMethod === "cod"){
-            order.isPaid = true
-            order.paidAt = new Date()
-        }
-    }
-
-    if(status==="cancelled"){
-        order.isPaid = false
-        order.deliveredAt = null
+      if (order.paymentMethod === "cod") {
+        order.isPaid = true;
+        order.paidAt = new Date();
+      }
     }
 
-    await order.save()
+    if (status === "Cancelled") {
+      order.isPaid = false;
+      order.deliveredAt = null;
+    }
 
-    res.status(200).json({message:"Order status updated successfully.", order})
+    await order.save();
+
+    res
+      .status(200)
+      .json({ message: "Order status updated successfully.", order });
   } catch (error) {
-    res.status(500).json({ message: "Server error" });
+    res.status(500).json({ message: "Server error", error });
   }
 };

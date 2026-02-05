@@ -3,14 +3,25 @@ import { Link } from 'react-router-dom'
 import { ChevronDown, Circle, Heart, Menu, Search, ShoppingCart } from 'lucide-react'
 import MobileHeader from './MobileHeader'
 import { CartContext } from '../../context/CartContext'
+import { useState } from 'react'
+import Signin from '../auth/Signin'
+import Signup from '../auth/Signup'
+import { useAuth } from '../../../admin/context/AuthContext'
 
 const Header = () => {
-  const {cart} = useContext(CartContext)
+  const { cart } = useContext(CartContext)
+  const [openLoginModal, setOpenLoginModal] = useState(false)
+  const [openSignupModal, setOpenSignupModal] = useState(false)
+  const { user, userLogout } = useAuth()
+
+
   return (
     <>
       <div className="w-full lg:hidden" >
         <MobileHeader />
       </div>
+      <Signin openModal={openLoginModal} setOpenModal={setOpenLoginModal} setOpenSignupModal={setOpenSignupModal} />
+      <Signup openModal={openSignupModal} setOpenModal={setOpenSignupModal} setOpenLoginModal={setOpenLoginModal} />
       <header className='hidden lg:block w-full py-5'>
         <div className='w-[90%] mx-auto flex mb-4 justify-between items-center'>
           <h1 className='text-3xl font-bold  bg-[#ffd333]'>Multi Shop</h1>
@@ -58,6 +69,16 @@ const Header = () => {
                   </span>
                 </div>
               </Link>
+              {
+                user ? <div className='text-white'>
+                  {user.name}
+                  <button onClick={userLogout}>Logout</button>
+                </div>
+                  :
+                  <button className='text-white border border-[#ffd333] hover:bg-[#ffd333] hover:cursor-pointer hover:text-[#3d464d]  py-2 px-5 transition-colors duration-300'
+                    onClick={() => setOpenLoginModal(true)}>Login</button>
+              }
+
             </div>
           </div>
         </div>

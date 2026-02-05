@@ -13,12 +13,12 @@ export const CartProvider = ({ children }) => {
 
     const addToCart = (product) => {
         let prev = [...cart]
-        const existing = prev.find(item => item.id === product.id)
+        const existing = prev.find(item => item._id === product._id)
 
         if (existing) {
             prev = prev.map((item,) => {
                 return (
-                    item.id === product.id ? { ...item, qty: item.qty + product.qty } : item
+                    item._id === product._id ? { ...item, qty: item.qty + product.qty } : item
                 )
             })
         } else {
@@ -29,13 +29,13 @@ export const CartProvider = ({ children }) => {
     }
 
     const removeFromCart = (id) => {
-        setCart(prev => prev.filter(item => item.id !== id))
+        setCart(prev => prev.filter(item => item._id !== id))
     }
 
     const updateQty = (productId, qty) => {
         setCart(prev => prev.map((item) => {
             return (
-                item.id === productId ? { ...item, qty: qty } : item
+                item._id === productId ? { ...item, qty: qty } : item
             )
         }))
     }

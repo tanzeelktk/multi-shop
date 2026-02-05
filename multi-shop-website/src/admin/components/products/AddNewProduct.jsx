@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import {
   Button,
   Label,
@@ -9,20 +9,43 @@ import {
   TextInput
 } from "flowbite-react";
 import { ImagePlus } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
+import axios from 'axios';
+import Swal from 'sweetalert2'
 
-const AddNewProduct = ({ setOpenModal, openModal }) => {
+const AddNewProduct = ({ setOpenModal, openModal, getProducts}) => {
 
   const [name, setName] = useState("")
   const [price, setPrice] = useState("")
   const [stock, setStock] = useState("")
-  const [discount, setDiscount] = useState("")
+  const [status, setStatus] = useState('')
+  const [discount, setDiscount] = useState(0)
   const [category, setCategory] = useState("")
   const salePrice = Math.ceil(price - (price * discount / 100))
   const [shortDescription, setShortDescription] = useState("")
   const [longDescription, setLongDescription] = useState("")
   const [productImages, setProductImages] = useState([])
-  const [mainImage, setMainImage] = useState(null)
+  const [mainImage, setMainImage] = useState(0)
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
+  const { adminToken } = useAuth()
+  const API_URL = import.meta.env.VITE_API_URL
+
+  const [categories, setCategories] = useState([])
+
+
+  useEffect(() => {
+    getCategories()
+  }, [])
+
+
+  async function getCategories() {
+    try {
+      const res = await axios.get(`${API_URL}/api/categories/get-all`)
+      setCategories(res.data.categories)
+    } catch (error) {
+      console.log(error)
+    }
+  }
 
   function onCloseModal() {
     setOpenModal(false)
@@ -31,32 +54,48 @@ const AddNewProduct = ({ setOpenModal, openModal }) => {
   function handleImageChange(e) {
     const files = Array.from(e.target.files)
     setProductImages(files)
-    if (!mainImage && files.length > 0) setMainImage(files[0])
   }
 
   function handleMainImageChange(index) {
-    setMainImage(productImages[index])
+    setMainImage(index)
     alert("Thumbnail updated successfully!")
   }
 
-  function handleSubmit(e) {
-    e.preventDefault()
-    if (!mainImage) return alert("Please select a thumbnail image for the product.")
+  function handleCategorySelect(value) {
+    console.log(value)
+  }
 
-    const product = {
-      name,
-      price,
-      stock,
-      category,
-      discount,
-      salePrice,
-      shortDescription,
-      longDescription,
-      productImages,
-      mainImage
+  async function handleSubmit(e) {
+    e.preventDefault()
+
+
+    const formData = new FormData()
+    formData.append("title", name)
+    formData.append("description", shortDescription)
+    formData.append("longDescription", longDescription)
+    formData.append("status", status)
+    formData.append("price", price)
+    formData.append("discountPercent", discount)
+    formData.append("category", category)
+    formData.append("stock", stock)
+    formData.append("mainImageIndex", mainImage)
+    for (let i = 0; i < productImages.length; i++) {
+      formData.append("images", productImages[i])
     }
-    console.log(product) // API call goes here
+    for (let pair of formData.entries()) {
+      console.log(pair[0], pair[1]);
+    }
+    const res = await axios.post(`${API_URL}/api/product/create`, formData,
+      { headers: { Authorization: `Bearer ${adminToken}` } })
+    if (res) {
+      Swal.fire({
+        title: "Product Created Sccessfully!",
+        icon: "success",
+        draggable: true
+      });
     setOpenModal(false)
+    getProducts()
+    }
   }
 
   return (
@@ -119,7 +158,7 @@ const AddNewProduct = ({ setOpenModal, openModal }) => {
         </div>
 
         {/* Product Form */}
-        <form className="grid grid-cols-1 md:grid-cols-2 gap-6" onSubmit={handleSubmit}>
+        <form className="grid grid-cols-1 md:grid-cols-2 gap-6" onSubmit={handleSubmit} encType="multipart/form-data">
 
           {/* Left Column */}
           <div className='flex flex-col gap-4'>
@@ -155,15 +194,38 @@ const AddNewProduct = ({ setOpenModal, openModal }) => {
                 required
               />
             </div>
-            <div>
+            <div className='flex flex-col gap-1'>
+              <Label htmlFor='status'>Status</Label>
+              <select
+                id="status"
+                value={status}
+                onChange={(e) => setStatus(e.target.value)}
+                required
+                className='focus:outline-none p-2 border border-gray-200 rounded-sm'
+              >
+                <option>Select Status</option>
+                <option value={"Active"}>Active</option>
+                <option value={"inActive"}>inActive</option>
+              </select>
+            </div>
+            <div className='flex flex-col gap-1'>
               <Label htmlFor="category">Category</Label>
-              <TextInput
+              <select
                 id="category"
-                placeholder="Mobile"
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
                 required
-              />
+                className='focus:outline-none p-2 border border-gray-200 rounded-sm'
+              >
+                <option>Select Category</option>
+                {
+                  categories && categories.map((catg, index) => {
+                    return (
+                      <option key={index} value={catg._id}>{catg.title}</option>
+                    )
+                  })
+                }
+              </select>
             </div>
           </div>
 
@@ -177,7 +239,6 @@ const AddNewProduct = ({ setOpenModal, openModal }) => {
                 placeholder="10"
                 value={discount}
                 onChange={(e) => setDiscount(e.target.value)}
-                required
               />
             </div>
             <div>

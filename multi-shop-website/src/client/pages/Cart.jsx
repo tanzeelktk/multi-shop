@@ -1,7 +1,8 @@
-import React, { useContext } from 'react'
+import React, { useContext, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { X, Plus, Minus} from 'lucide-react'
+import { X, Plus, Minus } from 'lucide-react'
 import { CartContext } from '../context/CartContext'
+
 
 const Cart = () => {
 
@@ -9,6 +10,10 @@ const Cart = () => {
     const subTotal = cart.reduce((total, item) => total + (item.finalPrice * item.qty), 0)
     const shipping = cart.length > 0 ? 10 : 0
     const total = subTotal + shipping
+    const API_URL = import.meta.env.VITE_API_URL
+
+
+
 
 
     return (
@@ -26,21 +31,21 @@ const Cart = () => {
                         {cart.length === 0 ? <div className='text-center text-[#3d464d] py-10'>Your Cart is Empty</div> :
                             cart.map((product, index) => {
                                 return (
-                                    <div className='grid grid-cols-5 text-center items-center text-[16px] bg-white text-[#3d464d] py-2'>
-                                        <div className='flex justify-center items-center'><img src={product.mainImage} alt="" className='w-10 h-10' />{product.title}</div>
+                                    <div key={index} className='grid grid-cols-5 text-center items-center text-[16px] bg-white text-[#3d464d] py-2'>
+                                        <div className='flex justify-center items-center'><img src={`${API_URL}/${product?.images?.find(img => img.main)?.filename}`} alt="" className='w-10 h-10' />{product.title}</div>
                                         <div>${product.finalPrice}</div>
                                         <div className='flex justify-center items-center text-[#3d464d]'>
                                             <button className='p-1 bg-[#ffd333] hover:bg-[#ffc800] hover:cursor-pointer'
-                                                onClick={() => updateQty(product.id, product.qty > 1 ? (product.qty - 1) : 1)}
+                                                onClick={() => updateQty(product._id, product.qty > 1 ? (product.qty - 1) : 1)}
                                             ><Minus size={20} strokeWidth={3} /></button>
                                             <div className='py-0.5 px-2 bg-gray-200'>{product.qty}</div>
                                             <button className='p-1 bg-[#ffd333] hover:bg-[#ffc800] hover:cursor-pointer'
-                                                onClick={() => updateQty(product.id, product.qty + 1)}
+                                                onClick={() => updateQty(product._id, product.qty + 1)}
                                             ><Plus size={20} strokeWidth={3} /></button>
                                         </div>
                                         <div>${product.finalPrice * product.qty}</div>
                                         <div><button className='p-1 bg-[#dc3545] hover:bg-[#c82333] rounded-sm hover:cursor-pointer'
-                                            onClick={() => removeFromCart(product.id)}>
+                                            onClick={() => removeFromCart(product._id)}>
                                             <X size={15} color='white' strokeWidth={4} />
                                         </button></div>
                                     </div>

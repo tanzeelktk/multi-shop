@@ -2,7 +2,9 @@ import express from "express";
 import {
   allProducts,
   createProduct,
+  deleteImage,
   deleteProduct,
+  newImageAdd,
   productByCategory,
   searchProduct,
   singleProduct,
@@ -18,7 +20,7 @@ productRouter.post(
   "/create",
   protect,
   adminOnly,
-  uploadProductImage.array("images"),
+  uploadProductImage.array("images", 5),
   createProduct,
 );
 productRouter.put(
@@ -28,7 +30,15 @@ productRouter.put(
   uploadProductImage.array("images"),
   updateProduct,
 );
-productRouter.delete("/delete", protect, adminOnly, deleteProduct);
+productRouter.put(
+  "/new-image/:id",
+  protect,
+  adminOnly,
+  uploadProductImage.single("image"),
+  newImageAdd,
+);
+productRouter.delete("/delete-image/:imageId/:pId", protect, adminOnly, deleteImage);
+productRouter.delete("/delete/:id", protect, adminOnly, deleteProduct);
 productRouter.get("/category/:id", productByCategory);
 productRouter.get("/search", searchProduct); //url will be /search?q=mobile
 

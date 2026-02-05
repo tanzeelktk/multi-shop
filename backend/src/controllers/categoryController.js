@@ -10,7 +10,7 @@ export const allCategories = async (req, res) => {
         .status(404)
         .json({ status: "fail", message: "No category found." });
     }
-    res.status(200).json({ status: "success", data: categories });
+    res.status(200).json({ status: "success", categories });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -18,8 +18,8 @@ export const allCategories = async (req, res) => {
 
 export const createCategory = async (req, res) => {
   try {
-    const { title } = req.body;
-    if (!title) {
+    const { title, description } = req.body;
+    if (!title || !description) {
       return res.status(400).json({ message: "Category name is required" });
     }
 
@@ -33,7 +33,7 @@ export const createCategory = async (req, res) => {
       return res.status(400).json({ message: "Category already exist" });
     }
     const image = req.file.path.replace(/\\/g, "/"); // Normalize path
-    const newCategory = await Category.create({ title, image });
+    const newCategory = await Category.create({ title, description, image });
     res.status(201).json({ status: "success", category: newCategory });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -43,12 +43,13 @@ export const createCategory = async (req, res) => {
 export const updateCategory = async (req, res) => {
   try {
     const { id } = req.params;
-    const { title } = req.body;
+    const { title, description } = req.body;
     const category = await Category.findById(id);
     if (!category) {
       return res.status(400).json({ message: "Category not exist" });
     }
-    if (title) category.title = title;
+    if (title !== undefined) category.title = title;
+    if (description !== undefined) category.description = description;
     if (req.file) {
       if (category.image) {
         await fs.unlink(category.image).catch(() => {});
@@ -58,11 +59,7 @@ export const updateCategory = async (req, res) => {
     await category.save();
     res.status(201).json({
       status: "success",
-      category: {
-        _id: category._id,
-        title: category.title,
-        image: category.image,
-      },
+      category,
     });
   } catch (error) {
     res.status(500).json({ message: error.message });

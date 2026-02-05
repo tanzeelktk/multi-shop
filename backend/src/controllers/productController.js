@@ -3,11 +3,26 @@ import fs from "fs/promises";
 
 export const allProducts = async (req, res) => {
   try {
-    const products = await Product.find();
+    const page = Number(req.query.page) || 1;
+    const limit = Number(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+    const totalProducts = await Product.countDocuments();
+    const products = await Product.find()
+      .populate("category", "title")
+      .skip(skip)
+      .limit(limit);
+
     if (productByCategory.length === 0) {
       return res.status(400).json({ message: "No product found." });
     }
-    res.status(200).json({ products: products });
+    res.status(200).json({
+      products,
+      pagination: {
+        totalProducts,
+        currentPage: page,
+        totalPages: Math.ceil(totalProducts / limit),
+      },
+    });
   } catch (error) {
     res
       .status(400)
@@ -34,12 +49,14 @@ export const singleProduct = async (req, res) => {
 };
 
 export const createProduct = async (req, res) => {
+  console.log(req.body);
   try {
     const {
       title,
       description,
       longDescription,
       category,
+      status,
       price,
       discountPercent,
       stock,
@@ -78,6 +95,7 @@ export const createProduct = async (req, res) => {
       longDescription,
       category,
       images,
+      status,
       price: priceNum,
       discountPercent,
       stock: stockNum,
@@ -97,6 +115,7 @@ export const updateProduct = async (req, res) => {
     const {
       title,
       description,
+      status,
       longDescription,
       category,
       price,
@@ -111,6 +130,7 @@ export const updateProduct = async (req, res) => {
       return res.status(400).json({ message: "Product not found." });
     }
     if (title !== undefined) product.title = title;
+    if (status !== undefined) product.status = status;
     if (description !== undefined) product.description = description;
     if (longDescription !== undefined)
       product.longDescription = longDescription;
@@ -121,44 +141,13 @@ export const updateProduct = async (req, res) => {
     if (stock !== undefined) product.stock = parseInt(stock);
     if (featured !== undefined) product.featured = featured;
     if (recent !== undefined) product.recent = recent;
-    if (
-      mainImageIndex !== undefined &&
-      (!req.files || req.files.length === 0)
-    ) {
-      const mainIndex =
-        !isNaN(mainImageIndex) &&
-        Number(mainImageIndex) >= 0 &&
-        product.images.length > Number(mainImageIndex)
-          ? Number(mainImageIndex)
-          : 0;
-      product.images = product.images.map((img, index) => {
-        return {
-          filename: img.filename,
-          main: mainIndex === index,
-        };
-      });
-    } else if (req.files && req.files.length > 0) {
-      for (const img of product.images) {
-        try {
-          await fs.unlink(img.filename);
-        } catch (error) {
-          console.log("Image not found", img.filename);
-        }
-      }
-      const mainIndex =
-        mainImageIndex !== undefined && !isNaN(mainImageIndex)
-          ? Number(mainImageIndex)
-          : 0;
-      product.images = req.files.map((file, index) => {
-        return {
-          filename: file.path.replace(/\\/g, "/"), // Normalize path
-          main: mainIndex === index,
-        };
-      });
-    }
 
     await product.save();
-    res.status(201).json({ product });
+    const populatedProduct = await Product.findById(product._id).populate(
+      "category",
+      "title",
+    );
+    res.status(201).json({ product: populatedProduct });
   } catch (error) {
     res.status(500).json({ message: "Error while updating product. ", error });
   }
@@ -167,6 +156,7 @@ export const updateProduct = async (req, res) => {
 export const deleteProduct = async (req, res) => {
   try {
     const { id } = req.params;
+    console.log(id);
     const product = await Product.findById(id);
     if (!product) {
       return res.status(400).json({ message: "Product id not exist" });
@@ -215,5 +205,62 @@ export const searchProduct = async (req, res) => {
     res.status(200).json({ products });
   } catch (error) {
     res.status(500).json({ message: "Error : ", error });
+  }
+};
+
+export const newImageAdd = async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!req.file) {
+      return res.status(400).json({ message: "No image provided" });
+    }
+    const product = await Product.findById(id);
+    if (!product) {
+      return res.status(404).json({ message: "No product id exist" });
+    }
+    const isFirstImage = !product.images || product.images.length === 0;
+    const newImage = {
+      filename: req.file.path.replace(/\\/g, "/"),
+      main: isFirstImage,
+    };
+    product.images.push(newImage);
+    await product.save();
+    res.status(200).json({ message: "Image added successfully", product });
+  } catch (error) {
+    res.status(500).json({ message: "Server error" });
+    console.log(error);
+  }
+};
+
+export const deleteImage = async (req, res) => {
+  try {
+    const { imageId, pId } = req.params; //product id
+
+    const product = await Product.findById(pId);
+    if (!product) {
+      return res.status(404).json({ message: "No product id exist" });
+    }
+    const deletedImage = product.images.find(
+      (img) => img._id.toString() === imageId.toString(),
+    );
+    if (!deletedImage) {
+      return res.status(404).json({ message: "Image not found" });
+    }
+
+    // 🔥 delete image file
+    await fs.unlink(deletedImage.filename).catch(() => {});
+
+    const newImageArray = product.images.filter(
+      (image) => image._id.toString() !== imageId.toString(),
+    );
+    if (deletedImage.main === true && newImageArray.length > 0) {
+      newImageArray[0].main = true;
+    }
+    product.images = newImageArray;
+    product.save();
+    res.status(200).json({ message: "Image deleted successfully", product });
+  } catch (error) {
+    res.status(500).json({ message: "Server error" });
+    console.log(error);
   }
 };
